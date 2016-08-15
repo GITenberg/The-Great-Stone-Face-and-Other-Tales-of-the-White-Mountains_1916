@@ -1,0 +1,61 @@
+sudo: required
+dist: trusty
+language: ruby
+
+before_install:
+before_install:
+- gem install asciidoctor -v 1.5.2
+- gem install tilt
+- sudo pip install git+https://github.com/gitenberg-dev/gitberg
+- sudo pip install pillow
+- sudo pip install cssutils
+- sudo pip install docutils
+- sudo pip install roman
+- sudo pip install git+https://github.com/gitenberg-dev/pg-epubmaker
+script:
+- VERSION=`ruby -e "require 'yaml'; meta = YAML.load_file('metadata.yaml'); puts meta['_version'];"`
+- git clone https://github.com/gitenberg-dev/asciidoctor-htmlbook.git
+- sudo pip install -r asciidoctor-htmlbook/gitberg-machine/requirements.txt
+
+- /usr/bin/python -c "from gitenberg import travis; travis.build_epub()"
+- ebook-convert book.epub book.mobi
+- xvfb-run ebook-convert book.epub book.pdf
+branches:
+  only:
+  - master
+notifications:
+  webhooks:
+    urls:
+      - https://unglue.it/api/travisci/webhook
+    on_success: always
+    on_failure: never
+    on_start: never
+deploy:
+  skip_cleanup: true
+  provider: releases
+  api_key:
+    secure: MGAkmPHwfxW2lyqGWZKR0Es+4nzJOQHyM4I85I0P2U+ulGwwIXEM6Y0Mn5RQm3Y7mr4ipp0j4Fa16j8is1FyDPVWAkAUnDh18yxoNLZif8x+u/xW+uiOMbRRj+ZzrB8cPNQVzCtR/rHh8eTdaHUYy5el6zla0zKGBbdkGgQXIJafJ6YHm7ji8CD1R1gWzpJ1vIe92GnevI2xYhEBg4Dt1Z1fcmOZWv3t3YqJnsYdpxCHTnbT6ei5ldUwb80bxJAWUqOEO5kPwtmtxJblPIUF10StcTedsMC9k4xe/mKPD4eazgQhcr1PGlsNfHvhBjvB3H+arVXO90ezJuwN+eckRRMVcWQFwWgPrc+6H0/0552g8LAxkZCPj/67s4PLV5mjgQ2EZ8AVyoJjv5kxok+pg2Peup+ycs+OXrEuW1KU+7mSZg6UYiNbBkQHW29jiuq1lLuODvOjBiEWI4bqK/WDdE0d8WoybRlCvUJX4fa+p35g/QFem9GsJH3/CV7cEilUqoZZFbMJc1E/6ZC5jkEbGJa07I3y3BZvP/xxefrjv/L/I5l7bO+XYgfCgP3PT8Oi426JWg+XCEwLgoPavGr+sD17z0LYQEw+vRhNPvB2tonDy/m828jcbHqxcC0BtiuQJdhuVaf2VdIyeIITjeidvmwb/JZWK7CnCTvZAtU9Kpk=
+  file:
+    - book.epub
+    - book.mobi
+    - book.pdf
+  "on":
+    repo: GITenberg/The-Great-Stone-Face-and-Other-Tales-of-the-White-Mountains_1916
+addons:
+  apt:
+    packages:
+    - xsltproc
+    - xvfb
+    - calibre
+    - python-pip
+    - git
+    - python-dev
+    - libjpeg-dev
+    - libpng-dev
+    - libfreetype6
+    - libfreetype6-dev
+    - zlib1g-dev
+    - python-lxml
+    - libxml2-dev
+    - libxslt1-dev
+    - tidy
